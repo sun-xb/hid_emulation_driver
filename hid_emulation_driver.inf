@@ -1,0 +1,86 @@
+;
+; hid_emulation_driver.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=hid_emulation_driver.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+hid_emulation_driver_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+hid_emulation_driver.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%hid_emulation_driver.DeviceDesc%=hid_emulation_driver_Device, Root\hid_emulation_driver ; TODO: edit hw-id
+
+[hid_emulation_driver_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+hid_emulation_driver.sys
+
+;-------------- Service installation
+[hid_emulation_driver_Device.NT.Services]
+AddService = hid_emulation_driver,%SPSVCINST_ASSOCSERVICE%, hid_emulation_driver_Service_Inst
+
+; -------------- hid_emulation_driver driver install sections
+[hid_emulation_driver_Service_Inst]
+DisplayName    = %hid_emulation_driver.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\hid_emulation_driver.sys
+
+;
+;--- hid_emulation_driver_Device Coinstaller installation ------
+;
+
+[hid_emulation_driver_Device.NT.CoInstallers]
+AddReg=hid_emulation_driver_Device_CoInstaller_AddReg
+CopyFiles=hid_emulation_driver_Device_CoInstaller_CopyFiles
+
+[hid_emulation_driver_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[hid_emulation_driver_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[hid_emulation_driver_Device.NT.Wdf]
+KmdfService =  hid_emulation_driver, hid_emulation_driver_wdfsect
+[hid_emulation_driver_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "hid_emulation_driver Installation Disk"
+hid_emulation_driver.DeviceDesc = "hid_emulation_driver Device"
+hid_emulation_driver.SVCDESC = "hid_emulation_driver Service"
